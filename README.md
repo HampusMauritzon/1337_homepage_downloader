@@ -8,4 +8,6 @@ An application for downloading homepages. Developed as part of the tretton37 cod
 `TODO`
 
 ##Improvement
-`TODO`
+- OS Independency - System.seperator
+- Error Handling 
+- Logging

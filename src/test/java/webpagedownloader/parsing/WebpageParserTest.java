@@ -1,8 +1,10 @@
-package webpagedownloader;
+package webpagedownloader.parsing;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
+import webpagedownloader.parsing.ParsedWebsite;
+import webpagedownloader.parsing.WebpageParser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,10 +25,14 @@ public class WebpageParserTest {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String textToBeParsed = bufferedReader.lines().collect(Collectors.joining());
 
-		Collection<String> actual = WebpageParser.parse(textToBeParsed);
+		ParsedWebsite actual = WebpageParser.parse(textToBeParsed);
 
-		Collection<String> expected = Lists.list("/assets/we", "tretton37.com/pop");
-		assertEquals(actual.size(), expected.size());
-		assertTrue(CollectionUtils.containsAll(actual, expected));
+		Collection<String> expectedHyperlink = Lists.list("/assets/we", "tretton37.com/pop");
+		assertEquals(actual.getHyperlinks().size(), expectedHyperlink.size());
+		assertTrue(CollectionUtils.containsAll(actual.getHyperlinks(), expectedHyperlink));
+
+		Collection<String> expectedAssets = Lists.list("/script/testing.js", "/assets/images/kitty.jpg", "/assets/frack.css");
+		assertEquals(actual.getAssets().size(), expectedAssets.size());
+		assertTrue(CollectionUtils.containsAll(actual.getAssets(), expectedAssets));
 	}
 }

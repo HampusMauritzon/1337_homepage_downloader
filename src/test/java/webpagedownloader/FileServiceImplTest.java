@@ -12,20 +12,20 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FileManagerTest {
+public class FileServiceImplTest {
 
-	private FileManager fileManager;
+	private FileServiceImpl fileServiceImpl;
 
 	@BeforeEach
 	public void setup() {
-		fileManager = new FileManager();
+		fileServiceImpl = new FileServiceImpl();
 	}
 
 	@Test
 	public void testStoreFile() throws IOException {
-		fileManager.setRootFolder("testRoot");
+		fileServiceImpl.setRootFolder("testRoot");
 
-		fileManager.storeFile("webpage.html", "<html>Some test data.</html>");
+		fileServiceImpl.storeFile("webpage.html", "<html>Some test data.</html>");
 
 		File file = new File("testRoot/webpage.html");
 		assertTrue(file.exists());

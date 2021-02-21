@@ -19,7 +19,12 @@ public class WebpageFetcher {
 	}
 
 	public String fetchWebpage(String urlName) throws IOException {
-		return httpClient.execute(new HttpGet(urlName), responseHandler);
+		String encoded = encode(urlName);
+		return httpClient.execute(new HttpGet(encoded), responseHandler);
+	}
+
+	private static String encode(String url) {
+		return url.replaceAll("ö", "%C3%B6");
 	}
 
 }

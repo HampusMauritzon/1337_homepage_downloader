@@ -7,5 +7,5 @@
     <bean id="responseHandler" class="webpagedownloader.client.WebpageResponseHandler" autowire="byName"/>
     <bean id="webpageFetcher" class="webpagedownloader.client.WebpageFetcher" autowire="byName"/>
 
-    <bean id="fileManager" class="webpagedownloader.FileManager" autowire="byName"/>
+    <bean id="fileService" class="webpagedownloader.FileServiceImpl" autowire="byName"/>
 </beans>
