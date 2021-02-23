@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +24,8 @@ public class FileServiceImplTest {
 	}
 
 	@Test
-	public void testStoreFile() throws IOException {
-		fileServiceImpl.setRootFolder("testRoot");
-
-		fileServiceImpl.storeFile("webpage.html", "<html>Some test data.</html>");
+	public void testStoreFile() throws IOException, URISyntaxException {
+		fileServiceImpl.storeFile(new URI("http://testRoot/webpage.html"), "<html>Some test data.</html>");
 
 		File file = new File("testRoot/webpage.html");
 		assertTrue(file.exists());

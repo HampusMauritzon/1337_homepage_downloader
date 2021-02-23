@@ -8,6 +8,10 @@ import webpagedownloader.parsing.ParsedWebsite;
 import webpagedownloader.parsing.WebpageParser;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedList;
 
 @SpringBootApplication
@@ -16,47 +20,47 @@ public class Application {
 	private static ApplicationContext CONTEXT = new ClassPathXmlApplicationContext("config.xml");
 
 	public static void main(String[] args) {
-		String url = "http://www.tretton37.com";
-		String rootFolder = "webpage";
-		if(args.length > 0) {
-			url = args[0];
-		}
-		if(args.length > 1) {
-			rootFolder = args[1];
-		}
-		if(url != null && url.length() > 0 && url.endsWith("/")) {
-			url = url.substring(0, url.length() - 1);
+		Instant startTime = Instant.now();
+		URI url = null;
+		try {
+			url = new URI("http://tretton37.com/");
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
 
 		WebpageFetcher webpageFetcher = CONTEXT.getBean(WebpageFetcher.class);
 		FileService fileService = CONTEXT.getBean("fileService", FileService.class);
-		fileService.setRootFolder(rootFolder);
 
-		LinkedList<String> links = new LinkedList<>();
-		LinkedList<String> assets = new LinkedList<>();
-		links.add("/main.html");
+		LinkedList<URI> links = new LinkedList<>();
+		LinkedList<URI> assets = new LinkedList<>();
+		links.add(url);
+
 		try {
 			while(!links.isEmpty()) {
-				String link = links.poll();
+				URI link = links.poll();
 				if(!fileService.exists(link)) {
-					String data = webpageFetcher.fetchWebpage(url + link);
+					System.out.println("Fetching " + link.toString());
+					String data = webpageFetcher.fetchWebpage(link);
 					fileService.storeFile(link , data);
 
-					ParsedWebsite parsed = WebpageParser.parse(data);
+					ParsedWebsite parsed = WebpageParser.parse(link, data);
 					links.addAll(parsed.getHyperlinks());
 					assets.addAll(parsed.getAssets());
 				}
 			}
 
 			while(!assets.isEmpty()) {
-				String asset = assets.poll();
+				URI asset = assets.poll();
 				if(!fileService.exists(asset)) {
-					String data = webpageFetcher.fetchWebpage(url + asset);
+					System.out.println("Fetching " + asset.toString());
+					String data = webpageFetcher.fetchWebpage(asset);
 					fileService.storeFile(asset , data);
 				}
 			}
+			System.out.println("Download complete in " + Duration.between(startTime, Instant.now()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("System shutting down.");
 	}
 }

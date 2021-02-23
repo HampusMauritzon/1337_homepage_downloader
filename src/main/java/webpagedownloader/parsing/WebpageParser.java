@@ -3,72 +3,106 @@ package webpagedownloader.parsing;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.yaml.snakeyaml.util.UriEncoder;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
 public class WebpageParser {
 
-	public static ParsedWebsite parse(String text) {
+	public static ParsedWebsite parse(URI page, String text) {
+		if(text == null) {
+			return new ParsedWebsite();
+		}
 		Document doc = Jsoup.parse(text);
-		return new ParsedWebsite(getHyperlinks(doc), getAssets(doc));
+		return new ParsedWebsite(getHyperlinks(page, doc), getAssets(page, doc));
 	}
 
-	private static Collection<String> getHyperlinks(Document document) {
+	private static Set<URI> getHyperlinks(URI page, Document document) {
 		Elements hyperlinks = document.select("a[href]");
 
 		Collection<String> links = new HashSet<>();
 		extractPaths(links, hyperlinks, "href");
 
-		links = links.stream()
-				.filter(link -> !isExternalLink(link))
-				.map(WebpageParser::stripParameters)
-				.filter(link -> !isNotLink(link))
-				.collect(toSet());
-		return links;
+		return resolveLinks(page, links);
 	}
 
-	private static Collection<String> getAssets(Document document) {
-		Elements links = document.select("link[href]");
+	private static Set<URI> getAssets(URI page, Document document) {
+		Elements linkers = document.select("link[href]");
 		Elements images = document.select("img[src]");
 		Elements videos = document.select("video[src]");
 		Elements scripts = document.select("script[src]");
 
-		Collection<String> assets = new HashSet<>();
-		extractPaths(assets, links, "href");
-		extractPaths(assets, images, "src");
-		extractPaths(assets, videos, "src");
-		extractPaths(assets, scripts, "src");
+		Collection<String> links = new HashSet<>();
+		extractPaths(links, linkers, "href");
+		extractPaths(links, images, "src");
+		extractPaths(links, videos, "src");
+		extractPaths(links, scripts, "src");
 
-		assets = assets.stream()
-				.filter(link -> !isExternalLink(link))
-				.map(WebpageParser::stripParameters)
-				.filter(link -> !isNotLink(link))
+		return resolveLinks(page, links);
+	}
+
+	private static Set<URI> resolveLinks(URI currentPage, Collection<String> links) {
+		return links.stream()
+				.filter(link -> !isNotHTTP(link))
+				.map(WebpageParser::removeParameters)
+				.map(link -> resolveBacktracking(currentPage, link))
+				.filter(link -> link.getHost() != null)
+				.map(WebpageParser::parseHost)
+				.filter(WebpageParser::isInternalLink)
 				.collect(toSet());
-		return assets;
 	}
 
 	private static void extractPaths(Collection<String> resources, Elements elements, String attributeKey) {
-		elements.forEach(hyperlink -> {
-			String path = hyperlink.attr(attributeKey);
-			resources.add(path);
-		});
+		elements.forEach(hyperlink ->
+				resources.add(hyperlink.attr(attributeKey)));
 	}
 
-	private static boolean isExternalLink(String link) {
-		return link.contains(".net") ||
-				link.contains(".se") ||
-				(link.contains(".com") && !link.contains("tretton37.com"));
+	private static boolean isInternalLink(URI link) {
+		return link.getHost().contains("tretton37.com");
 	}
 
-	private static boolean isNotLink(String link) {
-		return link.contains(":") || link.isEmpty();
+	private static boolean isNotHTTP(String link) {
+		return link.contains("mailto:") || link.isEmpty();
 	}
 
-	private static String stripParameters(String link) {
-		String[] strings = link.split("[#?]");
-		return strings[0];
+	private static URI resolveBacktracking(URI page, String link) {
+		String[] parts = UriEncoder.encode(link).split("/\\.\\./");
+		page = page.resolve(parts[0]);
+		for(int i = 1; i < parts.length; i++) {
+			page = page.resolve("../" + parts[i]);
+		}
+		return page;
+	}
+
+	private static String removeParameters(String link) {
+		return link.split("[?#]")[0];
+	}
+
+	private static URI parseHost(URI filePath) {
+		String host = filePath.getHost();
+		if(host.contains("tretton37.com")) {
+			String[] parts = host.split("\\.");
+			StringBuilder sb = new StringBuilder();
+			if(parts.length > 2) {
+				if (!parts[0].equals("www")) {
+					for(int i = 0; i < parts.length - 2; i++) {
+						sb.append("/");
+						sb.append(parts[i]);
+					}
+				}
+				try {
+					return new URI("http://tretton37.com" + sb.toString() + filePath.getPath());
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return filePath;
 	}
 }

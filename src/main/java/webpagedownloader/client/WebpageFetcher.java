@@ -1,12 +1,15 @@
 package webpagedownloader.client;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.IOException;
+import java.net.URI;
 
 @Component
 public class WebpageFetcher {
@@ -18,13 +21,13 @@ public class WebpageFetcher {
 		this.responseHandler = responseHandler;
 	}
 
-	public String fetchWebpage(String urlName) throws IOException {
-		String encoded = encode(urlName);
-		return httpClient.execute(new HttpGet(encoded), responseHandler);
+	public String fetchWebpage(URI url) throws IOException {
+		try {
+			return httpClient.execute(new HttpGet(url), responseHandler);
+		} catch(ClientProtocolException | HttpHostConnectException e) {
+			System.err.print(e.getMessage());
+			System.err.println(". URI: " + url.toString());
+		}
+		return null;
 	}
-
-	private static String encode(String url) {
-		return url.replaceAll("ö", "%C3%B6");
-	}
-
 }
