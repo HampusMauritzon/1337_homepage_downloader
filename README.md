@@ -11,7 +11,7 @@ The website will be stored in a folder named 'tretton37.com' located in the same
 If you want to rerun the application it is recommended to delete all content in the folder storing website (including the folder).
 
 ## Design
-###Overview
+### Overview
 The System consists of six main parts: the Application, the Downloader Executor Service, the Http Request Handler, the Asyncronous Response Processor, the Webpage Parser and the File Service:
 - The **Application** is the main class of the software, responsible for initializing the other classes and to handle the shutdown of the application.
   The Application is run in its own thread.
@@ -26,7 +26,7 @@ The System consists of six main parts: the Application, the Downloader Executor 
   The parser is constructed so it ignores links to external resources (other websites), this is to hinder the application for downloading the whole internet.
 - the **FileService** is responsible for handling the file monitoring and storing.
 
-###Performance Improving Concepts
+### Performance Improving Concepts
 The file system of application is used to keep track of which resource already has been downloaded and which to request from the server.
 This is done to keep these checks non-blocking and asyncronous. If a race condition would appear that causes a resources to be downloaded twice, the new one will simply overwrite the old one.
 
@@ -37,7 +37,7 @@ These generated futures are used to keep track of when the download is complete 
 The parser seperates its links into two different parts. The part which should be parsed and the one who shouldn't.
 This is to not spend unneccessary time parsing images, videos etc. looking for linked resources.
 
-##Improvement
+## Improvement
 This section cover some the improvements which can be done to the code.
 - **Error Handling -** the application currently has quite primitive error handling.
 - **Logging -** the application lacks a good logging system which would improve the error handling.
