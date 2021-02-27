@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 
 
 @Component
-public class WebpageFetcher {
+public class HttpRequestHandler {
 
 	private static final int MAX_CONNECTIONS_TOTAL = 10;
 	private static final int MAX_CONNECTIONS_PER_ROUTE = 5;
@@ -22,7 +22,7 @@ public class WebpageFetcher {
 	private final DownloaderExecutorService executorService;
 
 
-	public WebpageFetcher(DownloaderExecutorService executorService, CloseableHttpAsyncClient client) {
+	public HttpRequestHandler(DownloaderExecutorService executorService, CloseableHttpAsyncClient client) {
 		this.executorService = executorService;
 		this.client = client;
 		client.start();

@@ -16,7 +16,8 @@
 	<properties>
 		<java.version>15</java.version>
 	</properties>
-	<dependencies>
+    <packaging>jar</packaging>
+    <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>

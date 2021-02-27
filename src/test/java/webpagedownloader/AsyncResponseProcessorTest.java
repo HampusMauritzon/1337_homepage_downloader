@@ -5,7 +5,7 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import webpagedownloader.client.WebpageFetcher;
+import webpagedownloader.client.HttpRequestHandler;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,15 +23,15 @@ import static org.mockito.Mockito.when;
 public class AsyncResponseProcessorTest {
 	private AsyncResponseProcessor asyncResponseProcessor;
 
-	private WebpageFetcher webpageFetcher;
+	private HttpRequestHandler httpRequestHandler;
 	private FileService fileService;
 
 	@BeforeEach
 	public void setup() {
-		webpageFetcher = mock(WebpageFetcher.class);
+		httpRequestHandler = mock(HttpRequestHandler.class);
 		fileService = mock(FileService.class);
 
-		asyncResponseProcessor = new AsyncResponseProcessor(webpageFetcher, fileService);
+		asyncResponseProcessor = new AsyncResponseProcessor(httpRequestHandler, fileService);
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class AsyncResponseProcessorTest {
 
 		ArgumentCaptor<URI> hyperLinkCaptor = ArgumentCaptor.forClass(URI.class);
 		ArgumentCaptor<URI> assetCaptor = ArgumentCaptor.forClass(URI.class);
-		verify(webpageFetcher, times(2)).fetchWebpage(hyperLinkCaptor.capture(), any());
+		verify(httpRequestHandler, times(2)).fetchWebpage(hyperLinkCaptor.capture(), any());
 
 		List<URI> actual = hyperLinkCaptor.getAllValues();
 		Collection<URI> expected = Lists.list(new URI("http://tretton37.com/folder/subfolder/xena"),

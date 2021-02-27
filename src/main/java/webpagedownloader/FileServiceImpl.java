@@ -1,6 +1,7 @@
 package webpagedownloader;
 
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +10,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+@Component
 public class FileServiceImpl implements FileService {
 
 	@Override

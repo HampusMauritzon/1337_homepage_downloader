@@ -72,8 +72,7 @@ public class WebpageParser {
 	}
 
 	private static URI resolveBacktracking(URI page, String link) {
-		String encoded = UriEncoder.encode(link);
-		String[] parts = link.split("/\\.\\./");
+		String[] parts = UriEncoder.encode(link).split("/\\.\\./");
 		page = page.resolve(parts[0]);
 		for (int i = 1; i < parts.length; i++) {
 			page = page.resolve("../" + parts[i]);

@@ -1,17 +1,17 @@
 package webpagedownloader;
 
-import webpagedownloader.client.WebpageFetcher;
+import webpagedownloader.client.HttpRequestHandler;
 import webpagedownloader.parsing.ParsedWebsite;
 import webpagedownloader.parsing.WebpageParser;
 
 import java.net.URI;
 
 public class AsyncResponseProcessor {
-	private final WebpageFetcher webpageFetcher;
+	private final HttpRequestHandler requestHandler;
 	private final FileService fileService;
 
-	public AsyncResponseProcessor(WebpageFetcher webpageFetcher, FileService fileService) {
-		this.webpageFetcher = webpageFetcher;
+	public AsyncResponseProcessor(HttpRequestHandler requestHandler, FileService fileService) {
+		this.requestHandler = requestHandler;
 		this.fileService = fileService;
 	}
 
@@ -24,14 +24,14 @@ public class AsyncResponseProcessor {
 				.filter(fileService::notExists)
 				.forEach(hyperlink -> {
 					fileService.create(hyperlink);
-					webpageFetcher.fetchWebpage(hyperlink, this::hyperlinkResponseHandling);
+					requestHandler.fetchWebpage(hyperlink, this::hyperlinkResponseHandling);
 				});
 
 		parsed.getAssets().stream()
 				.filter(fileService::notExists)
 				.forEach(asset -> {
 					fileService.create(asset);
-					webpageFetcher.fetchWebpage(asset, this::assetResponseHandling);
+					requestHandler.fetchWebpage(asset, this::assetResponseHandling);
 				});
 	}
 

@@ -11,12 +11,11 @@ import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class WebpageFetcherTest {
-	private WebpageFetcher webpageFetcher;
+public class HttpRequestHandlerTest {
+	private HttpRequestHandler httpRequestHandler;
 
 	private DownloaderExecutorService downloaderExecutorService;
 	private CloseableHttpAsyncClient client;
@@ -25,14 +24,14 @@ public class WebpageFetcherTest {
 	public void setup() {
 		downloaderExecutorService = mock(DownloaderExecutorService.class);
 		client = mock(CloseableHttpAsyncClient.class);
-		webpageFetcher = new WebpageFetcher(downloaderExecutorService, client);
+		httpRequestHandler = new HttpRequestHandler(downloaderExecutorService, client);
 	}
 
 	@Test
 	public void testFetchWebpage() throws URISyntaxException {
 		URI url = new URI("http://tretton37.com");
-		BiConsumer<URI, String> biConsumer = (a, b) -> doNothing();
-		webpageFetcher.fetchWebpage(url, biConsumer);
+		BiConsumer<URI, String> biConsumer = (a, b) -> System.out.println();
+		httpRequestHandler.fetchWebpage(url, biConsumer);
 
 		verify(downloaderExecutorService).addFuture(any(Future.class));
 	}
