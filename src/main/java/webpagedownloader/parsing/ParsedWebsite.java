@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class ParsedWebsite {
-	private Collection<URI> hyperlinks;
-	private Collection<URI> assets;
+	private final Collection<URI> hyperlinks;
+	private final Collection<URI> assets;
 
 	public ParsedWebsite() {
 		this.hyperlinks = Collections.emptyList();

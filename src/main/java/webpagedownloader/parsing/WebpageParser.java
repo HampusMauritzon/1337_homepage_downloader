@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toSet;
 public class WebpageParser {
 
 	public static ParsedWebsite parse(URI page, String text) {
-		if(text == null) {
+		if (text == null) {
 			return new ParsedWebsite();
 		}
 		Document doc = Jsoup.parse(text);
@@ -72,9 +72,10 @@ public class WebpageParser {
 	}
 
 	private static URI resolveBacktracking(URI page, String link) {
-		String[] parts = UriEncoder.encode(link).split("/\\.\\./");
+		String encoded = UriEncoder.encode(link);
+		String[] parts = link.split("/\\.\\./");
 		page = page.resolve(parts[0]);
-		for(int i = 1; i < parts.length; i++) {
+		for (int i = 1; i < parts.length; i++) {
 			page = page.resolve("../" + parts[i]);
 		}
 		return page;
@@ -86,18 +87,18 @@ public class WebpageParser {
 
 	private static URI parseHost(URI filePath) {
 		String host = filePath.getHost();
-		if(host.contains("tretton37.com")) {
+		if (host.contains("tretton37.com")) {
 			String[] parts = host.split("\\.");
 			StringBuilder sb = new StringBuilder();
-			if(parts.length > 2) {
+			if (parts.length > 2) {
 				if (!parts[0].equals("www")) {
-					for(int i = 0; i < parts.length - 2; i++) {
+					for (int i = 0; i < parts.length - 2; i++) {
 						sb.append("/");
 						sb.append(parts[i]);
 					}
 				}
 				try {
-					return new URI("http://tretton37.com" + sb.toString() + filePath.getPath());
+					return new URI("https://tretton37.com" + sb.toString() + filePath.getPath());
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}

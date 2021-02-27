@@ -4,8 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     ">
-    <bean id="responseHandler" class="webpagedownloader.client.WebpageResponseHandler" autowire="byName"/>
-    <bean id="webpageFetcher" class="webpagedownloader.client.WebpageFetcher" autowire="byName"/>
-
     <bean id="fileService" class="webpagedownloader.FileServiceImpl" autowire="byName"/>
+    <bean id="executorService" class="webpagedownloader.DownloaderExecutorService" autowire="byName"/>
 </beans>

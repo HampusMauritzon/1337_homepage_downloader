@@ -1,66 +1,54 @@
 package webpagedownloader;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import webpagedownloader.client.WebpageFetcher;
-import webpagedownloader.parsing.ParsedWebsite;
-import webpagedownloader.parsing.WebpageParser;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.LinkedList;
+import java.util.Properties;
 
-@SpringBootApplication
 public class Application {
+	private static final ApplicationContext CONTEXT = new ClassPathXmlApplicationContext("config.xml");
+	private static final Properties PROPERTIES = loadProperties();
 
-	private static ApplicationContext CONTEXT = new ClassPathXmlApplicationContext("config.xml");
-
-	public static void main(String[] args) {
+	public static void main(String[] args) throws URISyntaxException {
 		Instant startTime = Instant.now();
-		URI url = null;
-		try {
-			url = new URI("http://tretton37.com/");
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		URI url = new URI(PROPERTIES.getProperty("website"));
+
+		FileService fileService = CONTEXT.getBean(FileService.class);
+
+		DownloaderExecutorService executorService = CONTEXT.getBean(DownloaderExecutorService.class);
+		WebpageFetcher webpageFetcher = new WebpageFetcher(executorService, WebpageFetcher.createClient());
+		AsyncResponseProcessor processor = new AsyncResponseProcessor(webpageFetcher, fileService);
+		if (!fileService.exists(url)) {
+			fileService.create(url);
+			webpageFetcher.fetchWebpage(url, processor::hyperlinkResponseHandling);
 		}
 
-		WebpageFetcher webpageFetcher = CONTEXT.getBean(WebpageFetcher.class);
-		FileService fileService = CONTEXT.getBean("fileService", FileService.class);
+		executorService.waitUntilComplete();
+		System.out.println("Download complete in " + Duration.between(startTime, Instant.now()));
+		System.out.println("System shutting down...");
+		executorService.shutdown();
+		webpageFetcher.shutdown();
+		System.out.println("Shutdown complete. Good Night!");
+		System.exit(0);
+	}
 
-		LinkedList<URI> links = new LinkedList<>();
-		LinkedList<URI> assets = new LinkedList<>();
-		links.add(url);
+	public static Properties loadProperties() {
+		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+		String appConfigPath = rootPath + "application.properties";
 
+		Properties properties = new Properties();
 		try {
-			while(!links.isEmpty()) {
-				URI link = links.poll();
-				if(!fileService.exists(link)) {
-					System.out.println("Fetching " + link.toString());
-					String data = webpageFetcher.fetchWebpage(link);
-					fileService.storeFile(link , data);
-
-					ParsedWebsite parsed = WebpageParser.parse(link, data);
-					links.addAll(parsed.getHyperlinks());
-					assets.addAll(parsed.getAssets());
-				}
-			}
-
-			while(!assets.isEmpty()) {
-				URI asset = assets.poll();
-				if(!fileService.exists(asset)) {
-					System.out.println("Fetching " + asset.toString());
-					String data = webpageFetcher.fetchWebpage(asset);
-					fileService.storeFile(asset , data);
-				}
-			}
-			System.out.println("Download complete in " + Duration.between(startTime, Instant.now()));
+			properties.load(new FileInputStream(appConfigPath));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("System shutting down.");
+		return properties;
 	}
 }

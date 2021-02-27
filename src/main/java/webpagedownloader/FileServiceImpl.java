@@ -12,20 +12,35 @@ import java.nio.file.Paths;
 public class FileServiceImpl implements FileService {
 
 	@Override
-	public void storeFile(URI filePath, String data) throws IOException {
-		if(data == null) {
+	public void create(URI filePath) {
+		File file = getFile(filePath);
+		System.out.println("Creating: " + file.getAbsolutePath());
+		if (Strings.isNotEmpty(file.getParent())) {
+			try {
+				Files.createDirectories(Paths.get(file.getParent()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void storeFile(URI filePath, String data) {
+		if (data == null) {
 			return;
 		}
 		File file = getFile(filePath);
-		if(!file.exists()) {
-			System.out.println("Storing: " + file.getAbsolutePath());
-			if (Strings.isNotEmpty(file.getParent())) {
-				Files.createDirectories(Paths.get(file.getParent()));
-			}
-			file.createNewFile();
+		try {
 			FileWriter writer = new FileWriter(file);
 			writer.write(data);
 			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -34,13 +49,17 @@ public class FileServiceImpl implements FileService {
 		return getFile(filePath).exists();
 	}
 
+	@Override
+	public boolean notExists(URI filePath) {
+		return !getFile(filePath).exists();
+	}
+
 	private File getFile(URI filePath) {
 		String path = filePath.getHost() + filePath.getPath();
-		if(path.endsWith("/") || path.isEmpty()) {
+		if (path.endsWith("/") || path.isEmpty()) {
 			path += "main.html";
 		}
-		//TODO getFileExtension is unstable, implement own file extension method.
-		if(com.google.common.io.Files.getFileExtension(path).isEmpty()) {
+		if (com.google.common.io.Files.getFileExtension(path).isEmpty()) {
 			path += ".html";
 		}
 		return new File(path);
